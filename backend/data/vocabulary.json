@@ -1,0 +1,10 @@
+[
+  {"id": 0, "label_en": "Hello",     "label_ar": "مرحبًا", "category": "General"},
+  {"id": 1, "label_en": "Thank you", "label_ar": "شكرًا",  "category": "General"},
+  {"id": 2, "label_en": "Yes",       "label_ar": "نعم",    "category": "General"},
+  {"id": 3, "label_en": "No",        "label_ar": "لا",     "category": "General"},
+  {"id": 4, "label_en": "Doctor",    "label_ar": "طبيب",   "category": "Medical"},
+  {"id": 5, "label_en": "Pain",      "label_ar": "ألم",    "category": "Medical"},
+  {"id": 6, "label_en": "Help",      "label_ar": "مساعدة", "category": "Medical"},
+  {"id": 7, "label_en": "Water",     "label_ar": "ماء",    "category": "Medical"}
+]

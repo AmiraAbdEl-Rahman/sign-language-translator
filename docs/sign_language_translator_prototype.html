@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign Language Translator – Prototype</title>
+<style>
+:root{--navy:#1f3a5f;--teal:#0e7c86;--bg:#eef2f6;--surface:#fff;--ink:#111827;--mute:#6b7280;--line:#e5e7eb;--chip:#e8f1f8;--ok:#2e9e6b;--bad:#d64545;--cam:#17212f;--page:#cfd8e3;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1621;--surface:#172232;--ink:#e8eef5;--mute:#93a4b8;--line:#263548;--chip:#1d3047;--cam:#0b121b;--page:#070c12}}
+:root[data-theme="dark"]{--bg:#0e1621;--surface:#172232;--ink:#e8eef5;--mute:#93a4b8;--line:#263548;--chip:#1d3047;--cam:#0b121b;--page:#070c12}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--page);color:var(--ink);display:grid;place-items:center}
+.phone{position:relative;width:min(390px,100%);height:min(800px,100%);background:var(--bg);border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 8px #111827,0 24px 60px rgba(0,0,0,.35)}
+@media (max-width:500px){.phone{border-radius:0;box-shadow:none;width:100%;height:100%}}
+.bar{background:var(--navy);color:#fff;padding:16px 20px;font-weight:700;font-size:18px;display:flex;align-items:center;gap:10px}
+.bar svg{width:30px;height:30px;flex:none}
+.screen{display:none;flex:1;overflow:auto;padding:16px}
+.screen.on{display:block}
+#splash{position:absolute;inset:0;z-index:5;background:linear-gradient(160deg,var(--navy),var(--teal));color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;transition:opacity .5s}
+#splash.off{opacity:0;pointer-events:none}
+#splash svg{width:120px;height:120px}
+#splash h1{margin:8px 0 0;font-size:28px;line-height:1.15}
+#splash p{margin:0;opacity:.85;font-size:14px}
+nav{display:flex;background:var(--surface);border-top:1px solid var(--line)}
+nav button{flex:1;border:0;background:none;padding:10px 0 12px;color:var(--mute);font:600 11px system-ui,sans-serif;cursor:pointer;display:grid;gap:4px;justify-items:center}
+nav button i{width:22px;height:22px;border-radius:50%;background:currentColor;opacity:.55}
+nav button.on{color:var(--teal)}nav button.on i{opacity:1}
+nav button:focus-visible,.btn:focus-visible,.chip:focus-visible,.card:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.hero{background:var(--teal);color:#fff;border:0;width:100%;text-align:center;padding:26px 14px;border-radius:22px;cursor:pointer;display:grid;gap:8px;justify-items:center;font:700 20px system-ui,sans-serif}
+.hero small{font-weight:400;font-size:13px;opacity:.9}
+.hero .dot{width:58px;height:58px;border-radius:50%;background:#fff;display:grid;place-items:center}.hero .dot b{width:24px;height:24px;border-radius:50%;background:var(--teal)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 6px;text-align:center;font:700 13px system-ui,sans-serif;color:var(--ink);cursor:pointer}
+.tile i{display:block;width:30px;height:30px;border-radius:50%;margin:0 auto 8px}
+h2{margin:0 0 12px;font-size:20px}
+.mute{color:var(--mute);font-size:13px}
+canvas{width:100%;aspect-ratio:4/3;background:var(--cam);border-radius:18px;display:block}
+.btn{border:0;border-radius:14px;padding:13px 16px;font:700 15px system-ui,sans-serif;cursor:pointer;background:var(--teal);color:#fff;width:100%}
+.btn.red{background:var(--bad)}.btn.ghost{background:var(--chip);color:var(--ink)}
+.word{font-size:var(--fs,30px);font-weight:800;color:var(--navy);margin:2px 0 8px;min-height:1.2em}
+:root[data-theme="dark"] .word{color:#9fd8de}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .word{color:#9fd8de}}
+.meter{height:10px;border-radius:6px;background:var(--line);overflow:hidden}.meter b{display:block;height:100%;width:0;background:var(--ok);transition:width .4s}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pill{font:700 12px system-ui,sans-serif;padding:4px 9px;border-radius:20px;background:#ddf2e3;color:#1c6b45}
+.item{display:flex;align-items:center;gap:12px}
+.av{width:36px;height:36px;border-radius:50%;border:2px solid var(--teal);display:grid;place-items:center;font-weight:800;color:var(--teal);flex:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{border:1.5px solid var(--teal);color:var(--teal);background:none;border-radius:20px;padding:6px 14px;font:700 13px system-ui,sans-serif;cursor:pointer}
+.chip.on{background:var(--teal);color:#fff}
+input[type=search]{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sign{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:8px;text-align:center;font:700 14px system-ui,sans-serif;color:var(--ink);cursor:pointer}
+.sign canvas{aspect-ratio:1;border-radius:10px;margin-bottom:6px}
+.set{display:grid;gap:8px}.set label{font-weight:700;font-size:15px}
+.set .row{margin-bottom:2px}
+select,input[type=range]{width:100%;accent-color:var(--teal)}select{padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px}
+.sw{appearance:none;width:48px;height:28px;border-radius:14px;background:var(--line);position:relative;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.sw:checked{background:var(--teal)}.sw:checked::after{left:23px}
+#sheet{position:absolute;inset:0;z-index:4;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
+#sheet.on{display:flex}#sheet>div{background:var(--surface);width:100%;border-radius:24px 24px 0 0;padding:18px;display:grid;gap:12px}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:6;white-space:nowrap}.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+<div id="splash"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="rgba(255,255,255,.12)" stroke="#fff" stroke-width="1.5"/><rect x="20" y="29" width="60" height="44" rx="13" fill="#fff"/><path d="M29 72v14l15-13z" fill="#fff"/><g stroke="#0e7c86" stroke-width="3.4" stroke-linecap="round"><path d="M44 52v-12M49 52v-16M54 52v-13M59 53l3-9M42 55l-6-6"/></g><rect x="42" y="50" width="19" height="14" rx="6" fill="#0e7c86"/></svg><h1>Sign Language<br>Translator</h1><p>Speak with your hands. Be heard everywhere.</p></div>
+<div class="bar"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="#0e7c86"/><rect x="20" y="29" width="60" height="44" rx="13" fill="#fff"/><path d="M29 72v14l15-13z" fill="#fff"/><rect x="42" y="50" width="19" height="14" rx="6" fill="#0e7c86"/><g stroke="#0e7c86" stroke-width="3.4" stroke-linecap="round"><path d="M44 52v-12M49 52v-16M54 52v-13M59 53l3-9"/></g></svg><span id="title">Sign Language Translator</span></div>
+
+<section class="screen on" id="home">
+<div class="card"><b>Welcome</b><div class="mute">Translate sign language into text and voice.</div></div>
+<button class="hero" data-go="translate"><span class="dot"><b></b></span>Start translating<small>Opens the camera</small></button>
+<div class="tiles"><button class="tile" data-go="history"><i style="background:var(--navy)"></i>History</button><button class="tile" data-go="vocab"><i style="background:#f2a93b"></i>Vocabulary</button><button class="tile" data-go="settings"><i style="background:var(--mute)"></i>Settings</button></div>
+<p class="mute" style="margin-top:18px">This is a clickable prototype. The camera and the AI model are simulated.</p>
+</section>
+
+<section class="screen" id="translate">
+<canvas id="cam" width="480" height="360" aria-label="Camera preview with hand tracking"></canvas>
+<div class="card" style="margin-top:12px"><div class="mute">Recognized word</div><div class="word" id="word" aria-live="polite">—</div><div class="row"><div class="meter" style="flex:1"><b id="bar"></b></div><b id="pct">0%</b></div><div class="row" style="margin-top:10px"><button class="btn ghost" id="speak" style="width:auto">Speak again</button><span class="mute" id="state">Camera is off</span></div></div>
+<button class="btn" id="run">Start camera</button>
+</section>
+
+<section class="screen" id="history"><div class="row"><h2>History</h2><button class="chip" id="clear">Clear history</button></div><div id="hlist"></div></section>
+
+<section class="screen" id="vocab"><h2>Vocabulary</h2><input type="search" id="q" placeholder="Search signs" aria-label="Search signs"><div class="chips" id="cats"></div><div class="grid" id="grid"></div></section>
+
+<section class="screen" id="settings"><h2>Settings</h2>
+<div class="card set"><label for="lang">Voice language</label><select id="lang"><option value="en-US">English</option><option value="ar-EG">Arabic</option></select></div>
+<div class="card set"><label for="rate">Voice speed</label><input type="range" id="rate" min="0.6" max="1.4" step="0.1" value="1"></div>
+<div class="card set"><label for="fs">Text size</label><input type="range" id="fs" min="22" max="44" value="30"></div>
+<div class="card set"><label for="th">Confidence threshold: <span id="thv">0.80</span></label><input type="range" id="th" min="0.5" max="0.95" step="0.05" value="0.8"></div>
+<div class="card row"><label for="dark" style="font-weight:700">Dark mode</label><input type="checkbox" class="sw" id="dark"></div>
+<div class="card row"><label for="mute" style="font-weight:700">Speak results aloud</label><input type="checkbox" class="sw" id="mute" checked></div>
+</section>
+
+<nav id="nav"><button data-go="home" class="on"><i></i>Home</button><button data-go="translate"><i></i>Translate</button><button data-go="history"><i></i>History</button><button data-go="vocab"><i></i>Vocabulary</button><button data-go="settings"><i></i>Settings</button></nav>
+<div id="sheet" role="dialog" aria-modal="true"><div><canvas id="sc" width="360" height="270"></canvas><div class="word" id="sw" style="text-align:center"></div><button class="btn" id="sx">Close</button></div></div>
+<div class="toast" id="toast"></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const W=[["Hello","General",[1,1,1,1,1]],["Thank you","General",[.5,1,1,1,1]],["Yes","General",[.4,.4,.4,.4,.4]],["No","General",[.5,1,1,.4,.4]],["Doctor","Medical",[.4,1,1,.4,.4]],["Pain","Medical",[.4,1,.4,.4,.4]],["Help","Medical",[1,.4,.4,.4,.4]],["Water","Medical",[.4,1,1,1,.4]]];
+const F=[[-.35,.25,140,.9],[-.25,.75,98,.9],[0,.8,90,1],[.25,.75,82,.9],[.45,.6,70,.7]];
+function hand(c,pose,t,live){const x=c.getContext("2d"),w=c.width,h=c.height,s=h*.3;x.clearRect(0,0,w,h);const sway=live?Math.sin(t/500)*.08:0,cx=w/2+Math.sin(t/900)*(live?14:0),cy=h*.88;
+x.save();x.translate(cx,cy);x.rotate(sway);x.strokeStyle="#3ddc84";x.fillStyle="#fff";x.lineWidth=3;x.lineCap="round";
+const P=[];F.forEach((f,i)=>{const e=pose[i]*(live?.92+.08*Math.sin(t/300+i):1),a=f[2]*Math.PI/180,b=[f[0]*s,-f[1]*s];x.beginPath();x.moveTo(0,0);x.lineTo(b[0],b[1]);let px=b[0],py=b[1];for(let k=1;k<=3;k++){px=b[0]+Math.cos(a)*f[3]*s*e*k/3*1.1;py=b[1]-Math.sin(a)*f[3]*s*e*k/3*1.1;x.lineTo(px,py);P.push([px,py])}x.stroke();P.push(b)});
+x.beginPath();[1,2,3,4].forEach((i,k)=>{const b=[F[i][0]*s,-F[i][1]*s];k?x.lineTo(b[0],b[1]):x.moveTo(b[0],b[1])});x.stroke();
+P.forEach(p=>{x.beginPath();x.arc(p[0],p[1],4,0,7);x.fill()});x.beginPath();x.arc(0,0,5,0,7);x.fill();x.restore();
+if(live){x.strokeStyle="#3ddc84";x.lineWidth=2;x.setLineDash([8,6]);x.strokeRect(w*.2,h*.08,w*.6,h*.86);x.setLineDash([])}}
+const S={hist:[],run:false,cur:0,tm:0,th:.8,rate:1,lang:"en-US",say:true};
+const cam=$("#cam");let pose=W[0][2];
+(function loop(t){if($("#translate").classList.contains("on"))hand(cam,S.run?pose:[.3,.3,.3,.3,.3],t,S.run);requestAnimationFrame(loop)})(0);
+function go(id){$$(".screen").forEach(e=>e.classList.toggle("on",e.id===id));$$("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.go===id));$("#title").textContent={home:"Sign Language Translator",translate:"Translation",history:"History",vocab:"Vocabulary",settings:"Settings"}[id];if(id!=="translate")stop();if(id==="history")renderH();if(id==="vocab")renderV()}
+document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g)go(g.dataset.go)});
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1800)}
+function speak(w){if(!S.say||!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(w);u.lang=S.lang;u.rate=S.rate;speechSynthesis.cancel();speechSynthesis.speak(u)}
+function step(){const i=Math.floor(Math.random()*W.length),conf=.72+Math.random()*.26;pose=W[i][2];S.cur=i;$("#state").textContent="Analyzing…";
+setTimeout(()=>{if(!S.run)return;$("#pct").textContent=Math.round(conf*100)+"%";$("#bar").style.width=conf*100+"%";
+if(conf<S.th){$("#word").textContent="Not recognized";$("#state").textContent="Try the sign again";$("#bar").style.background="var(--bad)"}
+else{$("#word").textContent=W[i][0];$("#state").textContent="Recognized";$("#bar").style.background="var(--ok)";S.hist.unshift({w:W[i][0],c:conf,t:new Date()});speak(W[i][0])}},900)}
+function start(){S.run=true;$("#run").textContent="Stop camera";$("#run").classList.add("red");$("#state").textContent="Tracking hands";step();S.tm=setInterval(step,3200)}
+function stop(){if(!S.run)return;S.run=false;clearInterval(S.tm);$("#run").textContent="Start camera";$("#run").classList.remove("red");$("#state").textContent="Camera is off"}
+$("#run").onclick=()=>S.run?stop():start();
+$("#speak").onclick=()=>{const w=$("#word").textContent;if(w&&w!=="—"&&w!=="Not recognized")speak(w);else toast("Nothing to speak yet")};
+function renderH(){const l=$("#hlist");l.innerHTML=S.hist.length?"":'<div class="card mute">No translations yet. Open Translate and start the camera.</div>';S.hist.forEach(h=>{const d=document.createElement("div");d.className="card item";d.innerHTML=`<div class="av">${h.w[0]}</div><div style="flex:1"><b>${h.w}</b><div class="mute">${h.t.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div></div><span class="pill">${Math.round(h.c*100)}%</span>`;l.appendChild(d)})}
+$("#clear").onclick=()=>{if(!S.hist.length)return toast("History is already empty");if(confirm("Clear all translations?")){S.hist=[];renderH();toast("History cleared")}};
+let cat="All";const cats=["All","General","Medical"];
+function renderV(){$("#cats").innerHTML="";cats.forEach(c=>{const b=document.createElement("button");b.className="chip"+(c===cat?" on":"");b.textContent=c;b.onclick=()=>{cat=c;renderV()};$("#cats").appendChild(b)});
+const q=$("#q").value.toLowerCase(),g=$("#grid");g.innerHTML="";W.forEach((w,i)=>{if((cat!=="All"&&w[1]!==cat)||!w[0].toLowerCase().includes(q))return;const b=document.createElement("button");b.className="sign";b.innerHTML=`<canvas width="200" height="200"></canvas>${w[0]}`;b.onclick=()=>openSheet(i);g.appendChild(b);hand(b.firstChild,w[2],0,false)})}
+$("#q").oninput=renderV;
+let sa=0;function openSheet(i){$("#sheet").classList.add("on");$("#sw").textContent=W[i][0];speak(W[i][0]);cancelAnimationFrame(sa);(function f(t){hand($("#sc"),W[i][2],t,true);sa=requestAnimationFrame(f)})(0)}
+$("#sx").onclick=()=>{$("#sheet").classList.remove("on");cancelAnimationFrame(sa)};
+$("#lang").onchange=e=>S.lang=e.target.value;$("#rate").oninput=e=>S.rate=+e.target.value;
+$("#fs").oninput=e=>$("#phone").style.setProperty("--fs",e.target.value+"px");
+$("#th").oninput=e=>{S.th=+e.target.value;$("#thv").textContent=S.th.toFixed(2)};
+$("#dark").onchange=e=>document.documentElement.dataset.theme=e.target.checked?"dark":"light";
+$("#mute").onchange=e=>S.say=e.target.checked;
+setTimeout(()=>$("#splash").classList.add("off"),1700);
+</script>
+</body>
+</html>

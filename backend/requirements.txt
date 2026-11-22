@@ -1,0 +1,7 @@
+flask>=3.0
+numpy>=1.26
+tensorflow>=2.16
+gunicorn>=22.0
+# Only needed for /api/predict_images and data collection:
+opencv-python>=4.9
+mediapipe==0.10.14
