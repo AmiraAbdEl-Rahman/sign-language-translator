@@ -260,8 +260,3 @@ and runs `flutter analyze` and `flutter test` for the mobile app.
 ## Author
 
 **Eng. Amira Abd El-Rahman Saqr**
-GitHub: [@AmiraAbdEl-Rahman](https://github.com/AmiraAbdEl-Rahman)
-
-## License
-
-Add a license of your choice (for example MIT) by creating a `LICENSE` file, then state it here.
